@@ -6,15 +6,115 @@
   
   <script>
 
+  const init = () =>{
+    const nameForm = document.getElementById('nameForm');
+    const userForm = document.getElementById('userForm');
+    const content = document.getElementById('content');
+    const name = document.getElementById('nameField');
+    const age = document.getElementById('ageField');
+    const url = document.getElementById('urlField');
+    const method = document.getElementById('methodSelect');
+    
+    userForm.onsubmit = async (e) => {
+      e.preventDefault();
+      // Get the selected URL and method
+      const selectedUrl = url.value;
+      const selectedMethod = method.value.toUpperCase();
+
+      try {
+        // Send a request to the server using the selected URL and method
+        const response = await fetch(selectedUrl, {
+          method: selectedMethod 
+        });
+
+
+        // If the request was successful, display the response
+        if (response.status === 200) {
+
+          // If the method was GET, display the response data in innerhtml and console
+          if (selectedMethod === 'GET') {
+            const responseData = await response.json();
+            content.innerHTML = 'Success' + '\n' + JSON.stringify(responseData);
+            console.log(responseData);
+          }
+
+          // If the method was HEAD do not display the response data
+          else {
+            content.innerHTML = 'Success';
+          }
+        } 
+
+        // if the request was not successful, display an error message
+        else if (response.status === 404) {
+          // If the method was GET, display an error message
+          if (selectedMethod === 'GET') {
+            const responseData = await response.json();
+            content.innerHTML = 'Error: ' + responseData.message;
+          } 
+
+          // If the method was HEAD do not display error message
+          else {
+            content.innerHTML = 'Error';
+          }
+        }  
+      } 
+            
+      catch (error) {
+        content.innerHTML = 'An error occurred';
+      }
+    };
+
+    nameForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const nameValue = name.value;
+      const ageValue = age.value;
+
+      try {
+        const response = await fetch('/addUser', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ name: nameValue, age: ageValue })
+        });
+
+        // If the request was successful, display the response
+        if (response.status === 201) {
+          const responseData = await response.json();
+          content.innerHTML = 'Success: ' + responseData.message;
+          console.log(responseData);
+        } 
+
+        // Updates the user if the user already exists
+        else if (response.status === 204) {
+          content.innerHTML = 'Success: User updated successfully.';
+        }
+        
+        // if the request was not successful, display an error message
+        else if (response.status === 400) {
+          const responseData = await response.json();
+          content.innerHTML = 'Error: ' + responseData.message;
+        }
+      } 
+      catch (error) {
+        content.innerHTML = 'An error occurred';
+      } 
+    };
+    
+  }
+
+  window.onload = init;
+
   </script>
+
 </head>
 <body>
   <section id="top">
     <h3>POST Status Code Tests</h3>
     <form id="nameForm" action="/addUser" method="post">
-      <label for="name">Name: </label>
+      <label for="nameField">Name: </label>
       <input id="nameField" type="text" name="name" />
-      <label for="age">Age: </label>
+      <label for="ageField">Age: </label>
       <input id="ageField" type="number" name="age" min="0" max="100" step="1"/>
       <input type="submit" value="Add User" />
     </form>
