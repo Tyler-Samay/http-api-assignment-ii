@@ -61,8 +61,9 @@ const addUser = (request, response) => {
     // If the user already exists, send a 204 status and update the age
     if (users[parsedBody.name]) {
       users[parsedBody.name].age = parsedBody.age;
-      response.writeHead(204, { 'Content-Type': 'application/json' });
-      response.end();
+      responseJSON.message = 'User updated successfully.';
+      respondJSON(request, response, 200, responseJSON);
+      return;
     }
 
     // Add the user to the object
